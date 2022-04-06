@@ -77,7 +77,6 @@ all_slope = unique(rbind(unique(obs_preds_slope[c('rid', 'slope')]), unique(othe
 rownames(all_slope) <- as.character(all_slope$rid)
 slope <- all_slope[rids,'slope']
 preds.grid.pt.df[,'slope'] = (slope - mean(slope))/sd(slope)
-head(preds.grid.pt.df)
 
 # save in ssn object
 ss <- putSSNdata.frame(preds.grid.pt.df, ss, Name = "predsSystematic500")
