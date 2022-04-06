@@ -1,5 +1,6 @@
-############################## DESIGN ####################################
-# - This file is run a the beginning of main files: stochastic_exchange_* and network_windows_*
+############################## INFO ####################################
+# - This file is run a the beginning of main files: stochastic_greedy_exchange
+#   and search_windows_utility_grid
 # - Reads .ssn object, parses covariates, creates prior distributions
 ##########################################################################
 
