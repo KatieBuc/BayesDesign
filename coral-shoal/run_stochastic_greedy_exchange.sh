@@ -1,5 +1,5 @@
 #!/bin/bash
-K=5
+K=1
 #utilityname=D.posterior.precision
 utilityname=KL.divergence
 
@@ -20,7 +20,7 @@ do
 #PBS -l ncpus=10
 #PBS -l cputype=6140
 #PBS -l mem=150gb
-#PBS -l walltime=250:00:00
+#PBS -l walltime=2:00:00
 #PBS -e scripts/$errorfile
 #PBS -o scripts/$outputfile
 
