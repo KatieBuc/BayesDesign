@@ -14,7 +14,7 @@ plan(cluster, workers = cl)
 
 #j=1
 utility.function.name='KL.divergence'
-n.monte.draws = 500
+n.monte.draws = 350
 year = c(2013)
 shoal='Barracouta East'
 n=20
@@ -24,7 +24,7 @@ length.transect = 500
 number.transects = 3
 refit.prior=TRUE
 N=50
-B=1000
+B=600
 K=15
 
 source('coral_data.R')
@@ -140,25 +140,28 @@ acceptance <- c()
 
 for(kk in 1:K){
   
+  # this loop takes about 60h I think (now it should take 8h)
   for(transect.num in 1:number.transects){
     other.transect.nums <- (1:number.transects)[-(transect.num)]
     
-    # search points in x and y directions of current point
-    not.d.x = setdiff(x.design.space, d[[transect.num]][1])
-    not.d.y = setdiff(y.design.space, d[[transect.num]][2])
-    not.d.xy = expand.grid(not.d.x,not.d.y)
-    
-    for(jj in 1:dim(not.d.xy)[1]){
+    for(coord.num in 1:3){ #x, y, alpha
+      if(coord.num==1) not.d = setdiff(x.design.space, d[[transect.num]][coord.num])
+      if(coord.num==2) not.d = setdiff(y.design.space, d[[transect.num]][coord.num])
+      if(coord.num==3) not.d = setdiff(angles, d[[transect.num]][coord.num])
       
-      # check point not already existing in design
-      duplicate_pt1_mask = !all(as.numeric(not.d.xy[jj,]) == d[[other.transect.nums[[1]]]][1:2])
-      duplicate_pt2_mask = !all(as.numeric(not.d.xy[jj,]) == d[[other.transect.nums[[2]]]][1:2])
-      
-      if(duplicate_pt1_mask&duplicate_pt2_mask){
+      for(jj in 1:length(not.d)){
         
         # take a clean copy of d, and swap the ith element in d for the jth element in not.d
         d.swap <- d
-        d.swap[[transect.num]][1:2] = as.numeric(not.d.xy[jj,])
+        d.swap[[transect.num]][coord.num] = not.d[jj]
+
+        # if swapped coordinates make for an x,y duplocate with existing design, next
+        test_condition = all(as.numeric(d.swap[[transect.num]][1:2] == d[[other.transect.nums[1]]][1:2]))|
+                      all(as.numeric(d.swap[[transect.num]][1:2] == d[[other.transect.nums[2]]][1:2]))
+          
+        if (test_condition) {
+          next
+        }
         
         # calculate utility for new design
         prior.draws <- get.prior.draws(n.monte.draws, prior.mu, prior.cov) 
@@ -172,33 +175,33 @@ for(kk in 1:K){
         U.design <- c(U.design, list(d.swap))
         
         # save
-        save.image(file=paste(output.path, file.name, sep='/'))
+        save.image(file=paste(output.path, file.name.cont, sep='/'))
       }
+      
+      max.idx <- which.max(tail(U.utility, length(not.d)))
+      d.max = U.design[[length(U.utility) - length(not.d) + max.idx]]
+      
+      # recalculate U.i.max.dist with higher B value here...
+      prior.draws <- get.prior.draws(B, prior.mu, prior.cov)
+      res <- get.expected.utility(utility.function, prior.draws, d.max, B)
+      all.res <- c(all.res, res)
+      U.i.max.dist <- res[[1]]
+      
+      out <- wilcox.test(U.i.max.dist, U.best.dist, alternative = c("greater"))
+      acceptance.prob = 1 - out$p.value
+      
+      if (runif(1) < acceptance.prob) 
+      {
+        d = d.max
+        U.best.dist = U.i.max.dist
+      }
+      
+      trace.proposals <- c(trace.proposals, median(U.i.max.dist, na.rm=TRUE))
+      trace <- c(trace, median(U.best.dist, na.rm=TRUE))
+      acceptance <- c(acceptance, acceptance.prob)
+      
+      save.image(file=paste(output.path, file.name.cont, sep='/'))
     }
-    
-    max.idx <- which.max(tail(U.utility, dim(not.d.xy)[1]))
-    d.max = U.design[[length(U.utility) - dim(not.d.xy)[1] + max.idx]]
-    
-    # recalculate U.i.max.dist with higher B value here...
-    prior.draws <- get.prior.draws(B, prior.mu, prior.cov)
-    res <- get.expected.utility(utility.function, prior.draws, d.max, B)
-    all.res <- c(all.res, res)
-    U.i.max.dist <- res[[1]]
-    
-    out <- wilcox.test(U.i.max.dist, U.best.dist, alternative = c("greater"))
-    acceptance.prob = 1 - out$p.value
-    
-    if (runif(1) < acceptance.prob) 
-    {
-      d = d.max
-      U.best.dist = U.i.max.dist
-    }
-    
-    trace.proposals <- c(trace.proposals, median(U.i.max.dist, na.rm=TRUE))
-    trace <- c(trace, median(U.best.dist, na.rm=TRUE))
-    acceptance <- c(acceptance, acceptance.prob)
-    
-    save.image(file=paste(output.path, file.name, sep='/'))
   }
 }
 
