@@ -1,12 +1,16 @@
-library(doFuture, lib.loc="~/katie/packages/")
-library(parallel, lib.loc="~/katie/packages/")
-library(tidyverse, lib.loc="~/katie/packages/")
-library(ggplot2, lib.loc="~/katie/packages/")
-library(mvnfast, lib.loc="~/katie/packages/")
-library(geodist, lib.loc="~/katie/packages/")
-library(raster, lib.loc="~/katie/packages/")
-library(psych, lib.loc="~/katie/packages/")
-library(MASS, lib.loc="~/katie/packages/")
+if(getwd() == "/home/virtualreef/katie/BayesDesign/coral-shoal"){
+library(doFuture, lib.loc="~/katie/packages")
+library(parallel, lib.loc="~/katie/packages")
+#library(reprex, lib.loc="~/katie/packages")
+#library(tidyverse, lib.loc="~/katie/packages")
+#library(ggplot2, lib.loc="~/katie/packages")
+library(mvnfast, lib.loc="~/katie/packages")
+library(geodist, lib.loc="~/katie/packages")
+library(sp, lib.loc="~/katie/packages")
+library(raster, lib.loc="~/katie/packages")
+library(psych, lib.loc="~/katie/packages")
+library(MASS, lib.loc="~/katie/packages")
+}
 
 cl = parallel::makeCluster(16) # number of threads, can slightly overload number of cores
 doFuture::registerDoFuture()
