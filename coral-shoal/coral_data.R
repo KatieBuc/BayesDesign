@@ -92,7 +92,7 @@ if(refit.prior){
   
   s.N.prior = c()
   for(ii in 1:N){
-    s.i <- as.vector(mvnfast::rmvn(1, rep(0, dim(h)[1]), Sigma.model(p, h)))
+    s.i <- as.vector(mvnfast::rmvn(1, rep(0, dim(h)[1]), Sigma.model(x0, h)))
     s.N.prior  <- rbind(s.N.prior , s.i)
   }
   
