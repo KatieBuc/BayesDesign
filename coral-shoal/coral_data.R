@@ -90,12 +90,18 @@ if(refit.prior){
   prior.sd.glm = c('beta.0'= 1, 'beta.1' = 0.25, 'beta.2' = 0.15, 'theta.0' = 1, 'theta.1' = 1, 'theta.2'= 8)
   prior.cov.glm = prior.sd.glm^2 * diag(length(prior.mu.glm))
   
+  s.N.prior = c()
+  for(ii in 1:N){
+    s.i <- as.vector(mvnfast::rmvn(1, rep(0, dim(h)[1]), Sigma.model(p, h)))
+    s.N.prior  <- rbind(s.N.prior , s.i)
+  }
+  
   # fit the model, posterior becomes prior for design, generate thetas and betas
   y.data = coral$HardCoral # binomial n = 20 
   x.data = cbind(1, coral[,'Depth'],coral[,'Depth']**2)
   fishnets.data = coral$new.fishnet
   fit.prior <- optim(x0, log.posterior, control = list(fnscale = -1), method="L-BFGS-B", lower=c(-100,-100,-100, -Inf, -Inf, -Inf), 
-                     upper=c(100, 100, 100, 2, 2, 11), hessian = TRUE, x=x.data, y=y.data, fishnets=fishnets.data, prior.mu=prior.mu.glm, prior.cov=prior.cov.glm)
+                     upper=c(100, 100, 100, 2, 2, 11), hessian = TRUE, x=x.data, y=y.data, fishnets=fishnets.data, prior.mu=prior.mu.glm, prior.cov=prior.cov.glm, s.N=s.N.prior)
   
   prior.mu=fit.prior[[1]]
   prior.cov=solve(-fit.prior$hessian)
