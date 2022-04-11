@@ -32,7 +32,7 @@ dim.grid = 10
 meters.apart = 5
 length.transect = 500
 number.transects = 3
-refit.prior=TRUE
+refit.prior=FALSE
 N=50
 B=600
 K=15
@@ -130,7 +130,7 @@ start.x <- sample(x.design.space, 3, replace=FALSE)
 start.y <- sample(y.design.space, 3, replace=FALSE)
 
 # initialise design
-d <- d.init <- list(c(start.x[1], start.y[1], 0), c(start.x[2], start.y[2], 45), c(start.x[3], start.y[3], 135))
+d <- d.init <- list(c(start.x[1], start.y[1], start.alpha[1]), c(start.x[2], start.y[2], start.alpha[2]), c(start.x[3], start.y[3], start.alpha[3]))
 all.res <- list()
 
 # initial utility (saved as a distribution)
@@ -166,8 +166,8 @@ for(kk in 1:K){
         d.swap[[transect.num]][coord.num] = not.d[jj]
 
         # if swapped coordinates make for an x,y duplocate with existing design, next
-        test_condition = all(as.numeric(d.swap[[transect.num]][1:2] == d[[other.transect.nums[1]]][1:2]))|
-                      all(as.numeric(d.swap[[transect.num]][1:2] == d[[other.transect.nums[2]]][1:2]))
+        test_condition = all(as.numeric(d.swap[[transect.num]][1:2]) == as.numeric(d[[other.transect.nums[1]]][1:2]))|
+                      all(as.numeric(d.swap[[transect.num]][1:2]) == as.numeric(d[[other.transect.nums[2]]][1:2]))
           
         if (test_condition) {
           next
